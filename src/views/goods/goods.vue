@@ -2,10 +2,10 @@
   <div class="goods">
     <div class="swripers">
       <van-swipe :autoplay="3000" style="width:100%;height:100%" indicator-color="white">
-        <van-swipe-item>1</van-swipe-item>
-        <van-swipe-item>2</van-swipe-item>
-        <van-swipe-item>3</van-swipe-item>
-        <van-swipe-item>4</van-swipe-item>
+        <van-swipe-item><img class="img" src="../../assets/1.jpg" alt=""></van-swipe-item>
+        <van-swipe-item><img class="img" src="../../assets/2.jpg" alt=""></van-swipe-item>
+        <van-swipe-item><img class="img" src="../../assets/3.jpg" alt=""></van-swipe-item>
+        <van-swipe-item><img class="img" src="../../assets/4.jpg" alt=""></van-swipe-item>
       </van-swipe>
     </div>
     <div class="nav">
@@ -1677,5 +1677,9 @@ export default {
   display: flex;
   align-items: center;
   padding-left: 5px;
+}
+.img{
+    width: 100%;
+    height: 100%;
 }
 </style>
