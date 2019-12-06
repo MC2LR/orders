@@ -22,6 +22,9 @@ export default {
         //选择人数
         numClick(index){
             console.log(index+1);
+            this.$router.push({
+                      name: "index"
+                    });
         }
     }
 }

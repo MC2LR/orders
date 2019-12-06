@@ -1,6 +1,11 @@
 <template>
   <div class="comment">
       我是评价
+       <van-tabbar v-model="active" route active-color="red">
+      <van-tabbar-item  icon="home-o" replace to="/home">首页</van-tabbar-item>
+      <van-tabbar-item icon="search" replace to="/orderNum">我的</van-tabbar-item>
+      <van-tabbar-item icon="friends-o" replace to="/comment">评价</van-tabbar-item>
+    </van-tabbar>
   </div>
 </template>
 
@@ -9,7 +14,7 @@ export default {
     name:"comment",
     data() {
         return {
-            
+            active:1
         }
     },
 }

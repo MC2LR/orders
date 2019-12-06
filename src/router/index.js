@@ -1,25 +1,37 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-
-
 Vue.use(Router)
 
 export default new Router({
     routes: [{
-            path: '/',
+            path: '/index',
             name: 'index',
             component: () =>
                 import ('../views/index'),
             children: [{
-                path: '/goods',
-                name: 'goods',
+                path: '/home',
+                name: 'home',
                 component: () =>
-                    import ('../views/goods/goods'),
+                    import ('../views/home/home'),
+                children: [{
+                        path: '/goods',
+                        name: 'goods',
+                        component: () =>
+                            import ('../views/goods/goods'),
+                    },
+                    {
+                        path: '/goodscart',
+                        name: 'goodscart',
+                        component: () =>
+                            import ('../views/goodscart/goodscart'),
+                    },
+                ],
+                redirect: '/goods'
             }, ],
-            redirect: '/goods'
+            redirect: '/home'
         },
         {
-            path: '/orderNum',
+            path: '/',
             name: 'orderNum',
             component: () =>
                 import ('../views/orderNum/orderNum'),
@@ -29,6 +41,6 @@ export default new Router({
             name: 'comment',
             component: () =>
                 import ('../views/comment/comment'),
-        }
+        },
     ]
 })
