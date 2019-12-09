@@ -1,14 +1,24 @@
 <template>
   <div class="goods">
+    <!-- 轮播图 -->
     <div class="swripers">
       <van-swipe :autoplay="3000" style="width:100%;height:100%" indicator-color="white">
-        <van-swipe-item><img class="img" src="../../assets/1.jpg" alt=""></van-swipe-item>
-        <van-swipe-item><img class="img" src="../../assets/2.jpg" alt=""></van-swipe-item>
-        <van-swipe-item><img class="img" src="../../assets/3.jpg" alt=""></van-swipe-item>
-        <van-swipe-item><img class="img" src="../../assets/4.jpg" alt=""></van-swipe-item>
+        <van-swipe-item>
+          <img class="img" src="../../assets/1.jpg" alt />
+        </van-swipe-item>
+        <van-swipe-item>
+          <img class="img" src="../../assets/2.jpg" alt />
+        </van-swipe-item>
+        <van-swipe-item>
+          <img class="img" src="../../assets/3.jpg" alt />
+        </van-swipe-item>
+        <van-swipe-item>
+          <img class="img" src="../../assets/4.jpg" alt />
+        </van-swipe-item>
       </van-swipe>
     </div>
     <div class="nav">
+      <!-- 商品列表 -->
       <ul class="nav-list">
         <li
           class="list"
@@ -18,6 +28,7 @@
           :class="{'lishStyle':listIndex === index}"
         >{{item.navList}}</li>
       </ul>
+      <!-- 商品列表对应的商品 -->
       <div class="nav-content">
         <ul>
           <li v-for="(item,index) in navContent" :key="index" class="li-flex">
@@ -37,6 +48,7 @@
                     style="width:50%;margin-left:10px;text-align:center;height:.3rem;line-height:.3rem;"
                   >{{item.tax}}</p>
                 </div>
+                <!-- 商品加减按钮 -->
                 <div class="btn">
                   <transition name="move">
                     <div
@@ -63,6 +75,12 @@
 <script>
 export default {
   name: "goods",
+  props: {
+    flag: {
+      type: Boolean,
+      default: false
+    }
+  },
   data() {
     return {
       navData: [
@@ -201,7 +219,7 @@ export default {
             }
           ]
         },
-          {
+        {
           navList: "颜料理",
           navContent: [
             {
@@ -336,7 +354,7 @@ export default {
             }
           ]
         },
-          {
+        {
           navList: "颜料理",
           navContent: [
             {
@@ -471,7 +489,7 @@ export default {
             }
           ]
         },
-          {
+        {
           navList: "颜料理",
           navContent: [
             {
@@ -606,7 +624,7 @@ export default {
             }
           ]
         },
-          {
+        {
           navList: "颜料理",
           navContent: [
             {
@@ -741,7 +759,7 @@ export default {
             }
           ]
         },
-          {
+        {
           navList: "颜料理",
           navContent: [
             {
@@ -876,7 +894,7 @@ export default {
             }
           ]
         },
-          {
+        {
           navList: "颜料理",
           navContent: [
             {
@@ -1011,7 +1029,7 @@ export default {
             }
           ]
         },
-          {
+        {
           navList: "颜料理",
           navContent: [
             {
@@ -1146,7 +1164,7 @@ export default {
             }
           ]
         },
-          {
+        {
           navList: "颜料理",
           navContent: [
             {
@@ -1281,7 +1299,7 @@ export default {
             }
           ]
         },
-          {
+        {
           navList: "颜料理",
           navContent: [
             {
@@ -1416,7 +1434,7 @@ export default {
             }
           ]
         },
-          {
+        {
           navList: "颜料理",
           navContent: [
             {
@@ -1550,26 +1568,40 @@ export default {
               }
             }
           ]
-        },
+        }
       ],
-      listIndex: 0,
-      navContent: [],
-      active: 1
+      listIndex: 0, //定义需要修改样式的临时变量
+      navContent: [], //点击商品列表要渲染的商品
+      active: 0 //底部导航默认选中状态
     };
   },
   created() {
+    // 初始化数据
     this.navContent = this.navData[0].navContent;
-    console.log(this.navContent);
+  },
+  watch: {
+    //点击购物车的清空后便利总数据，将总有的商品数目归零
+    flag: function() {
+      for (var i = 0; i < this.navData.length; i++) {
+        console.log(this.navData[i])
+        for(var j =0;j<this.navData[i].navContent.length;j++){
+          this.navData[i].navContent[j].allPrice.goodsNum = 0;
+        }
+      }
+    }
   },
   methods: {
+    // 点击商品列表进行样式修改个数据展示
     listClick(index) {
-      this.listIndex = index;//更改点击后样式
+      this.listIndex = index; //更改点击后样式
       this.navContent = this.navData[index].navContent;
     },
+    //点击加好按钮时的逻辑
     addCart(index) {
       this.navContent[index].allPrice.goodsNum++;
       this.$emit("childByValue", this.navContent[index].allPrice);
     },
+    //点击减号按钮时的逻辑
     decreaseCart(index) {
       this.navContent[index].allPrice.goodsNum--;
       this.$emit("decrese", this.navContent[index].allPrice);
@@ -1582,6 +1614,7 @@ export default {
   width: 100%;
   height: 100%;
 }
+
 .move-enter,
 .move-leave-active {
   opacity: 0;
@@ -1595,9 +1628,12 @@ export default {
 .count {
   height: 0.2rem;
   display: inline-block;
+  width: 0.2rem;
+  text-align: center;
+  font-size: 12px;
 }
 .btn {
-  width: 35%;
+  width: 43%;
   position: relative;
 }
 .decrease {
@@ -1670,7 +1706,7 @@ export default {
   width: 100%;
 }
 .goods-name {
-  width: 60%;
+  width: 57%;
   padding-left: 10px;
 }
 .icon {
@@ -1678,8 +1714,8 @@ export default {
   align-items: center;
   padding-left: 5px;
 }
-.img{
-    width: 100%;
-    height: 100%;
+.img {
+  width: 100%;
+  height: 100%;
 }
 </style>

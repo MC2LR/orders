@@ -14,18 +14,11 @@ export default new Router({
                 component: () =>
                     import ('../views/home/home'),
                 children: [{
-                        path: '/goods',
-                        name: 'goods',
-                        component: () =>
-                            import ('../views/goods/goods'),
-                    },
-                    {
-                        path: '/goodscart',
-                        name: 'goodscart',
-                        component: () =>
-                            import ('../views/goodscart/goodscart'),
-                    },
-                ],
+                    path: '/goods',
+                    name: 'goods',
+                    component: () =>
+                        import ('../views/goods/goods'),
+                }],
                 redirect: '/goods'
             }, ],
             redirect: '/home'
@@ -41,6 +34,12 @@ export default new Router({
             name: 'comment',
             component: () =>
                 import ('../views/comment/comment'),
+        },
+        {
+            path: '/pay',
+            name: 'pay',
+            component: () =>
+                import ('../views/pay/pay'),
         },
     ]
 })
