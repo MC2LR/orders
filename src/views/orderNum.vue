@@ -1,6 +1,8 @@
 <template>
   <div class="order-num">
-      <div class="order-num-log"></div>
+      <div class="order-num-log">
+          <img src="../assets/1.jpg" class="imgs" alt="">
+      </div>
       <h4 style="text-align:center;margin:.15rem 0 1rem 0">请选择就餐人数</h4>
       <ul class="num-Wraper">
           <li class="num-item" v-for="(item,index) in numData" :key="index" @click="numClick(index)">
@@ -56,5 +58,9 @@ export default {
         text-align: center;
         border-radius: 3px;
         color: white;
+    }
+    .imgs{
+        width: 100%;
+        height: 100%;
     }
 </style>

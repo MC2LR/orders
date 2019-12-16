@@ -2,37 +2,38 @@ import axios from 'axios';
 import router from '../router/index'
 
 //自动切换环境
-axios.defaults.baseURL = "http://172.16.101.112:9966/api/";
+axios.defaults.baseURL = "http://10.167.20.50:8080/jeecg-boot/";
 //设置超时时间
 axios.defaults.timeout = 10000;
+axios.defaults.withCredentials = true;
 // post请求头
 // axios.defaults.headers.post['Content-Type'] = 'application/json;charset=UTF-8';
 
 
 
 
-//请求拦截(请求发出前处理请求)
-axios.interceptors.request.use((config) => {
-    //console.log(config);
+// //请求拦截(请求发出前处理请求)
+// axios.interceptors.request.use((config) => {
+//     //console.log(config);
 
-    return config;
-}, (error) => {
-    return Promise.reject(error);
-});
+//     return config;
+// }, (error) => {
+//     return Promise.reject(error);
+// });
 
-// 响应拦截器（处理响应数据）
-axios.interceptors.response.use((res) => {
-    console.log(res.data.code)
-    if (res.data.code === 9) {
-        localStorage.removeItem('username');
-        router.replace({
-            path: '/login'
-        })
-    }
-    return res;
-}, (error) => {
-    return Promise.reject(error);
-});
+// // 响应拦截器（处理响应数据）
+// axios.interceptors.response.use((res) => {
+//     console.log(res.data.code)
+//     if (res.data.code === 9) {
+//         localStorage.removeItem('username');
+//         router.replace({
+//             path: '/login'
+//         })
+//     }
+//     return res;
+// }, (error) => {
+//     return Promise.reject(error);
+// });
 
 
 

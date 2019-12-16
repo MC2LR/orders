@@ -1,10 +1,12 @@
 <template>
   <div class="home">
+    <!-- 菜品 -->
     <div class="nav-wraper">
       <keep-alive>
-        <router-view @childByValue="priceData" @decrese="decrese" :flag="clears" />
+        <router-view @childByValue="priceData" @decrese="decrese" :flag="clears" :goodsNumId="goodsNumId" :goodsId="goodsId" :goodsNum="goodsNum"/>
       </keep-alive>
     </div>
+    <!-- 购物车logo -->
     <div class="gooda-cart">
       <div class="contentsz allprice" @click="cartShow">
         <div class="numsss" v-show="allPrice>0">{{num}}</div>
@@ -14,43 +16,46 @@
         <span class="priClo" :class="{'heightLight':this.allPrice>0}">￥{{allPrice}}</span>
       </div>
     </div>
+    <!-- 购物车 -->
     <transition name="fold">
-      <div class="shopcart-list" v-show="listShow">
+      <div class="shopcart-list" v-if="listShow">
         <div class="list-header">
           <h1 class="titless">购物车</h1>
           <span class="empty" @click="clear">清空</span>
         </div>
-        <ul>
+        <ul v-if="listShow">
           <li v-for="(item,index) in cartDtas" :key="index" class="li-flex">
             <div class="icon">
-              <img width="65" height="65" :src="item.img" />
+              <img width="65" height="65" :src="'http://10.167.20.50:8080/jeecg-boot/'+item.img" />
             </div>
             <div class="content">
               <div class="goods-sort-weaper">
                 <div class="goods-name">
                   <p
-                    style="width:50%;margin-left:10px;text-align:center;height:.2rem;line-height:.2rem;"
-                  >{{item.title}}</p>
+                    style="width:100%;text-align:center;height:.2rem;line-height:.2rem;"
+                  >{{item.pname}}</p>
                   <div
-                    style="border-radius:.2rem;width:60%;margin-left:10px;text-align:center;height:.3rem;line-height:.3rem;background:#EECA26"
-                  >￥{{item.allPrice.price}}</div>
+                    style="border-radius:.2rem;width:60%;margin-left:20px;text-align:center;height:.3rem;line-height:.3rem;background:#EECA26"
+                  >￥{{item.price}}</div>
                   <p
-                    style="width:50%;margin-left:10px;text-align:center;height:.3rem;line-height:.3rem;"
-                  >{{item.tax}}</p>
+                    style="width:50%;margin-left:15px;text-align:center;height:.3rem;line-height:.3rem;"
+                  >{{item.rankAsc}}</p>
                 </div>
               </div>
             </div>
+            <!-- 菜品增减按钮 -->
             <div class="btn">
               <transition name="move">
-                <div class="decrease">-</div>
+                <div class="decrease" @click="dle(index)">-</div>
               </transition>
-              <div class="count">1</div>
-              <div class="add">+</div>
+              <div class="count" >{{item.count}}</div>
+              <div class="add" @click="add(index)">+</div>
             </div>
           </li>
         </ul>
       </div>
     </transition>
+    <!-- 遮罩层 -->
     <transition name="fade">
       <div class="list-mask" @click="maskDisappear" v-show="listShow"></div>
     </transition>
@@ -58,6 +63,8 @@
 </template>
 
 <script>
+import { api } from "../../../api/api_system";
+import { httpService } from "../../../service/http.service";
 export default {
   name: "home",
   data() {
@@ -65,18 +72,12 @@ export default {
       allPrice: 0, //总价格
       num: 0,
       listShow: false,
+      goodsId:"",
+      goodsNum:0,
+      goodsNumId:"",
       clears: false, //清空购物车flag
       cartDtas: [      //购物车数据
-        {
-          img:
-            "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-          title: "菜名",
-          tax: "$200",
-          allPrice: {
-            price: "100",
-            goodsNum: 0
-          }
-        }
+       
       ] //购物车数据
     };
   },
@@ -85,32 +86,62 @@ export default {
     cartShow() {
       if (this.allPrice > 0) {
         this.listShow = true;
-      }
+         httpService.request(api.listCart,{"id":null}, "post").then(res => {
+          this.cartDtas = res.data;
+    })
+  }
+    },
+    dle(index){
+      this.cartDtas[index].count--;
+      this.num --;
+      this.goodsNumId = this.cartDtas[index].id;
+      this.goodsNum = this.cartDtas[index].count;
+      this.allPrice -=parseInt(this.cartDtas[index].price);
+       httpService.request(api.delCart,{"id":this.cartDtas[index].id}, "post").then(res => {
+         if(this.cartDtas[index].count == 0){
+           this.goodsId = this.cartDtas[index].id
+           this.cartDtas.splice(index,1);
+            if(this.cartDtas.length == 0){
+              this.listShow = false;
+              this.num =0;
+              this.allPrice = 0;
+            }
+          }
+    
+    })
+    },
+    add(index){
+      httpService.request(api.addCart,{"id":this.cartDtas[index].id}, "post").then(res => {
+        this.cartDtas[index].count++;
+          this.num ++;
+          this.allPrice +=parseInt(this.cartDtas[index].price);
+        this.goodsNumId = this.cartDtas[index].id;
+        this.goodsNum = this.cartDtas[index].count;
+    })
     },
     //控制遮罩层的显示隐藏
     maskDisappear() {
       this.listShow = false;
     },
     priceData(value) {
-      this.allPrice += parseInt(value.price); //总价相加
+      this.allPrice += parseInt(value); //总价相加
       this.num++; //总数目相加
-      //如果总价大于零，将flag重新归为false
-      if (this.allPrice > 0) {
-        this.clears = false;
-      }
     },
     //总价相减
     decrese(value) {
-      this.allPrice -= parseInt(value.price); //控制总价
+      this.allPrice -= parseInt(value); //控制总价
       this.num--;
     },
     //清空购物车
     clear() {
+       httpService.request(api.clearCart,{"id":null}, "post").then(res => {
+         
+    })
       this.cartDtas.splice(0, this.cartDtas.length); //清空数据
       this.listShow = false; //购物车弹框隐藏
       this.allPrice = 0; //清空是将总价归零
       this.num = 0; //清空时将数目归零
-      this.clears = true; //清空是将flag变为true传给子组件，让其商品数量变为零
+      this.clears = !this.clears; //清空是将flag变为true传给子组件，让其商品数量变为零
     }
   }
 };
