@@ -3,7 +3,7 @@
     <!-- 菜品 -->
     <div class="nav-wraper">
       <keep-alive>
-        <router-view @childByValue="priceData" @decrese="decrese" :flag="clears" :goodsNumId="goodsNumId" :goodsId="goodsId" :goodsNum="goodsNum"/>
+        <router-view :clearDetaile="clearDetaile" @numsDec="numsDec" @numsed="numed" :isif="isif" @childByValue="priceData" @decrese="decrese" :flag="clears" :goodsNumId="goodsNumId" :goodsId="goodsId" :goodsNum="goodsNum"/>
       </keep-alive>
     </div>
     <!-- 购物车logo -->
@@ -38,8 +38,8 @@
                     style="border-radius:.2rem;width:60%;margin-left:20px;text-align:center;height:.3rem;line-height:.3rem;background:#EECA26"
                   >￥{{item.price}}</div>
                   <p
-                    style="width:50%;margin-left:15px;text-align:center;height:.3rem;line-height:.3rem;"
-                  >{{item.rankAsc}}</p>
+                    style="width:90%;margin-left:15px;text-align:center;height:.3rem;line-height:.3rem;"
+                  >税込￥{{item.price*1.08}}</p>
                 </div>
               </div>
             </div>
@@ -70,51 +70,70 @@ export default {
   data() {
     return {
       allPrice: 0, //总价格
-      num: 0,
-      listShow: false,
-      goodsId:"",
-      goodsNum:0,
-      goodsNumId:"",
+      num: 0,//总数量
+      clearDetaile:false,
+    //此变量是将购物车的商品数量传到详情页，让其统一商品的数量
+      listShow: false,//是否显示商品列表
+      goodsId:"",//将商品的id传到goods
+      goodsNum:0,//商品照片总量
+      goodsNumId:"",//商品id所对应的数量
       clears: false, //清空购物车flag
       cartDtas: [      //购物车数据
        
       ] //购物车数据
     };
   },
+   props: {
+    isif: {
+      type: Boolean //父组件穿过来的
+    },
+   },
   methods: {
     //如果总价格大于零，遮罩层和购车车的商品将显示
     cartShow() {
       if (this.allPrice > 0) {
-        this.listShow = true;
+        this.clearDetaile = false;
+        this.listShow = true; //如果商品大于零，让商品列表显示
          httpService.request(api.listCart,{"id":null}, "post").then(res => {
-          this.cartDtas = res.data;
+          this.cartDtas = res.data;//将获取到的数据进行赋值
     })
   }
     },
+    //通过详情页进行的商品加减(通过点击购物车和加好按钮触发的事件)
+    numed(allPrice){
+      this.allPrice = this.allPrice + parseInt(allPrice)+allPrice*1.08; //进行购物车的总价进行赋值
+      this.num++; //进行购物车商品总数量的赋值
+    },   
+    //通过详情页进行的商品加减(通过点击减号触发的事件)
+    numsDec(allPrice){
+         this.allPrice = this.allPrice - parseInt(allPrice)-allPrice*1.08;
+         this.num--;
+    },
+    //购物车里的减号方法
     dle(index){
-      this.cartDtas[index].count--;
-      this.num --;
-      this.goodsNumId = this.cartDtas[index].id;
-      this.goodsNum = this.cartDtas[index].count;
-      this.allPrice -=parseInt(this.cartDtas[index].price);
+      this.cartDtas[index].count--;//让当前商品数量减少
+      this.num --;//总数量减少
+      this.goodsNumId = this.cartDtas[index].id;//将当前商品的id传到goods里进行判断
+      this.goodsNum = this.cartDtas[index].count;//将当前商品数量传到goods
+      this.allPrice = this.allPrice-parseInt(this.cartDtas[index].price)-this.cartDtas[index].price*1.08;//将税后总价赋值
        httpService.request(api.delCart,{"id":this.cartDtas[index].id}, "post").then(res => {
          if(this.cartDtas[index].count == 0){
            this.goodsId = this.cartDtas[index].id
            this.cartDtas.splice(index,1);
             if(this.cartDtas.length == 0){
+              //如果购物车里的商品为零，让遮罩层消失，总价和总数量归零
               this.listShow = false;
-              this.num =0;
+              this.num =0; 
               this.allPrice = 0;
             }
           }
-    
     })
     },
     add(index){
       httpService.request(api.addCart,{"id":this.cartDtas[index].id}, "post").then(res => {
         this.cartDtas[index].count++;
           this.num ++;
-          this.allPrice +=parseInt(this.cartDtas[index].price);
+          this.allPrice =this.allPrice+parseInt(this.cartDtas[index].price)+this.cartDtas[index].price*1.08;
         this.goodsNumId = this.cartDtas[index].id;
         this.goodsNum = this.cartDtas[index].count;
     })
@@ -124,18 +143,18 @@ export default {
       this.listShow = false;
     },
     priceData(value) {
-      this.allPrice += parseInt(value); //总价相加
+      this.allPrice =  this.allPrice + parseInt(value)+value*1.08; //总价相加
       this.num++; //总数目相加
     },
     //总价相减
     decrese(value) {
-      this.allPrice -= parseInt(value); //控制总价
+      this.allPrice = this.allPrice-parseInt(value)-value*1.08; //控制总价
       this.num--;
     },
     //清空购物车
     clear() {
        httpService.request(api.clearCart,{"id":null}, "post").then(res => {
-         
+          this.clearDetaile = true;
     })
       this.cartDtas.splice(0, this.cartDtas.length); //清空数据
       this.listShow = false; //购物车弹框隐藏

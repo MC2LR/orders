@@ -1,72 +1,77 @@
 <template>
   <div class="goods">
+    <detaile v-show="!isIf" :clearDetaile="clearDetaile" :goodsNumed="goodsNumed" @fun="funs" :detaileFlag="detaileFlag" @numsDec="numDec" @nums="nums"/>
+    <div class="show-wraper" v-show="isIf">
     <!-- 轮播图 -->
-    <div class="swripers">
-      <van-swipe :autoplay="3000" style="width:100%;height:100%" indicator-color="white">
-        <van-swipe-item>
-          <img class="img" src="../../../assets/1.jpg" alt />
-        </van-swipe-item>
-        <van-swipe-item>
-          <img class="img" src="../../../assets/2.jpg" alt />
-        </van-swipe-item>
-        <van-swipe-item>
-          <img class="img" src="../../../assets/3.jpg" alt />
-        </van-swipe-item>
-        <van-swipe-item>
-          <img class="img" src="../../../assets/4.jpg" alt />
-        </van-swipe-item>
-      </van-swipe>
-    </div>
-    <div class="nav">
-      <!-- 商品列表 -->
-      <ul class="nav-list">
-        <li
-          class="list"
-          @click="listClick(index)"
-          v-for="(item,index) in navDatas"
-          :key="index"
-          :class="{'lishStyle':listIndex === index}"
-        >{{item.navList}}</li>
-      </ul>
-      <!-- 商品列表对应的商品 -->
-      <div class="nav-content">
-        <ul>
-          <li v-for="(item,index) in navContent" :key="index" class="li-flex">
-            <div class="icon">
-              <img width="65" height="65" :src="'http://10.167.20.50:8080/jeecg-boot/'+item.img" />
-            </div>
-            <div class="content">
-              <div class="goods-sort-weaper">
-                <div class="goods-name">
-                  <p
-                    style="width:100%;text-align:center;height:.2rem;line-height:.2rem;"
-                  >{{item.pname}}</p>
-                  <div
-                    style="border-radius:.2rem;width:60%;margin-left:10px;text-align:center;height:.3rem;line-height:.3rem;background:#EECA26"
-                  >￥{{item.price}}</div>
-                  <p
-                    style="width:50%;margin-left:10px;text-align:center;height:.3rem;line-height:.3rem;"
-                  >{{item.rankAsc}}</p>
-                </div>
-                <!-- 商品加减按钮 -->
-                <div class="btn">
-                  <transition name="move">
+      <div class="swripers">
+        <van-swipe :autoplay="3000" style="width:100%;height:100%" indicator-color="white">
+          <van-swipe-item>
+            <img class="img" src="../../../assets/1.jpg" alt />
+          </van-swipe-item>
+          <van-swipe-item>
+            <img class="img" src="../../../assets/2.jpg" alt />
+          </van-swipe-item>
+          <van-swipe-item>
+            <img class="img" src="../../../assets/3.jpg" alt />
+          </van-swipe-item>
+          <van-swipe-item>
+            <img class="img" src="../../../assets/4.jpg" alt />
+          </van-swipe-item>
+        </van-swipe>
+      </div>
+      <div class="nav">
+        <!-- 商品列表 -->
+        <ul class="nav-list">
+          <li
+            class="list"
+            @click="listClick(index)"
+            v-for="(item,index) in navDatas"
+            :key="index"
+            :class="{'lishStyle':listIndex === index}"
+          >{{item.navList}}</li>
+        </ul>
+        <!-- 商品列表对应的商品 -->
+        <div class="nav-content">
+          <ul>
+            <li v-for="(item,index) in navContent" :key="index" class="li-flex" @click="deteiled(item.id,index)">
+              <div class="icon">
+                <img width="65" height="65" :src="'http://10.167.20.50:8080/jeecg-boot/'+item.img" />
+              </div>
+              <div class="content">
+                <div class="goods-sort-weaper">
+                  <div class="goods-name">
+                    <p
+                      class="eli"
+                      style="width:90%;text-align:center;height:.2rem;line-height:.2rem;"
+                    >{{item.pname}}</p>
                     <div
-                      class="decrease"
+                      style="border-radius:.2rem;width:60%;margin-left:10px;text-align:center;height:.3rem;line-height:.3rem;background:#EECA26"
+                    >￥{{item.price}}</div>
+                    <p
+                      class="eli"
+                      style="width:80%;margin-left:10px;text-align:center;height:.3rem;line-height:.3rem;"
+                    >税込￥{{item.price*1.08}}</p>
+                  </div>
+                  <!-- 商品加减按钮 -->
+                  <div class="btn">
+                    <transition name="move">
+                      <div
+                        class="decrease"
+                        v-show="navContent[index].count>0"
+                        @click.stop.prevent="decreaseCart(index)"
+                      >-</div>
+                    </transition>
+                    <div
                       v-show="navContent[index].count>0"
-                      @click.stop.prevent="decreaseCart(index)"
-                    >-</div>
-                  </transition>
-                  <div
-                    v-show="navContent[index].count>0"
-                    class="count"
-                  >{{navContent[index].count}}</div>
-                  <div class="add" @click.stop.prevent="addCart(index)">+</div>
+                      class="count"
+                    >{{navContent[index].count}}</div>
+                    <div class="add" @click.stop.prevent="addCart(index)">+</div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </li>
-        </ul>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   </div>
@@ -75,1526 +80,54 @@
 <script>
 import { api } from "../../../api/api_system";
 import { httpService } from "../../../service/http.service";
+import detaile from "../detaile/detaile"
 export default {
   name: "goods",
+  components:{
+    detaile
+  },
   props: {
     flag: {
       type: Boolean,
       default: false
     },
-    goodsId:{
-      type:String,
+    isif:{  
+      type:Boolean
+    },
+    goodsId: {
+      type: String,
       default: "dd"
-
     },
-    goodsNum:{
-      type:Number
+    goodsNum: {
+      type: Number
     },
-    goodsNumId:{
-      type:String
-    }
+    goodsNumId: {
+      type: String
+    },
+    clearDetaile:{
+      type:Boolean
+    },
   },
   data() {
     return {
-      navData: [
-        {
-          navList: "颜料理",
-          navContent: [
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$150",
-              allPrice: {
-                price: "3",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/6b/29e3d29b0db63d36f7c500bca31d8jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$50",
-              allPrice: {
-                price: "14",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/f/28/a51e7b18751bcdf871648a23fd3b4jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$56",
-              allPrice: {
-                price: "1",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/4/e7/8277a6a2ea0a2e97710290499fc41jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$78",
-              allPrice: {
-                price: "17",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$300",
-              allPrice: {
-                price: "36",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$784",
-              allPrice: {
-                price: "14",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$415",
-              allPrice: {
-                price: "20",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$36",
-              allPrice: {
-                price: "10",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$78",
-              allPrice: {
-                price: "36",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$274",
-              allPrice: {
-                price: "14",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$300",
-              allPrice: {
-                price: "36",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$20",
-              allPrice: {
-                price: "15",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$78",
-              allPrice: {
-                price: "10",
-                goodsNum: 0
-              }
-            }
-          ]
-        },
-        {
-          navList: "一品料理",
-          navContent: [
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            }
-          ]
-        },
-        {
-          navList: "寿司",
-          navContent: [
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            }
-          ]
-        },
-        {
-          navList: "日理",
-          navContent: [
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            }
-          ]
-        },
-        {
-          navList: "清蒸鱼",
-          navContent: [
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            }
-          ]
-        },
-        {
-          navList: "三文鱼",
-          navContent: [
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            }
-          ]
-        },
-        {
-          navList: "清蒸三文鱼",
-          navContent: [
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            }
-          ]
-        },
-        {
-          navList: "炒米饭",
-          navContent: [
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            }
-          ]
-        },
-        {
-          navList: "烧菜",
-          navContent: [
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            }
-          ]
-        },
-        {
-          navList: "颜料理",
-          navContent: [
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            }
-          ]
-        },
-        {
-          navList: "颜料理",
-          navContent: [
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              title: "菜名",
-              tax: "$200",
-              allPrice: {
-                price: "100",
-                goodsNum: 0
-              }
-            }
-          ]
-        }
-      ],
+      isIf:true,//是否显示详情页
       listIndex: 0, //定义需要修改样式的临时变量
-      navDatas:[],
+      navDatas: [], //总数据渲染
       navContent: [], //点击商品列表要渲染的商品
-      active: 0 //底部导航默认选中状态
+      active: 0, //底部导航默认选中状态
+      detaileFlag:"",//临时储存商品id的变量
+      temIndex:0,//商品下标的临时变量
+      goodsNumed:0//将商品列表的商品数量传到详情页
     };
   },
   created() {
+
     // 初始化数据
-    httpService.request(api.toProduct, {"id":null}, "post").then(res => {
-      this.navDatas = res.data;
-      this.navContent = this.navDatas[0].navContent;
-    })
+    httpService.request(api.toProduct, { id: null }, "post").then(res => {
+      console.log(res);
+      this.navDatas = res.data; //q请求到的数据进行二次赋值
+      this.navContent = this.navDatas[0].navContent; //初始化数据
+    });
   },
   watch: {
     //点击购物车的清空后便利总数据，将总有的商品数目归零
@@ -1604,22 +137,29 @@ export default {
           this.navDatas[i].navContent[j].count = 0;
         }
       }
+
     },
-    goodsId:function(){
+    isif:function(){
+       //保证导航跳转后是最初页面
+        this.isIf = true;
+    },
+    //将购物车里的数量与商品列表的数量统一归零
+    goodsId: function() {
       for (var i = 0; i < this.navDatas.length; i++) {
         for (var j = 0; j < this.navDatas[i].navContent.length; j++) {
-           if(this.goodsId == this.navDatas[i].navContent[j].id){
-          this.navDatas[i].navContent[j].count =0;
-        }
+          if (this.goodsId == this.navDatas[i].navContent[j].id) {
+            this.navDatas[i].navContent[j].count = 0;
+          }
         }
       }
     },
-    goodsNum:function(){
+    //将购物车里的单个商品数量与商品列表的商品数量相统一
+    goodsNum: function() {
       for (var i = 0; i < this.navDatas.length; i++) {
         for (var j = 0; j < this.navDatas[i].navContent.length; j++) {
-           if(this.goodsNumId == this.navDatas[i].navContent[j].id){
+          if (this.goodsNumId == this.navDatas[i].navContent[j].id) {
             this.navDatas[i].navContent[j].count = this.goodsNum;
-        }
+          }
         }
       }
     }
@@ -1634,15 +174,40 @@ export default {
     addCart(index) {
       this.navContent[index].count++;
       this.$emit("childByValue", this.navContent[index].price);
-      httpService.request(api.addCart, {"id":this.navContent[index].id}, "post").then(res => {  
-    })
+      httpService
+        .request(api.addCart, { id: this.navContent[index].id }, "post")
+        .then(res => {});
+    },
+    //详情页返回
+    funs(){
+      console.log("子到父");
+      this.isIf = true; //让详情页隐藏，列表页显示
+    },
+    //跳转详情页
+    deteiled(id,index){
+      this.detaileFlag = id;//将商品id赋给临时变量，传到详情页
+      this.isIf=false; 
+      this.temIndex = index; //将在详情页要展示的商品的下标进行保存
+      this.goodsNumed = this.navContent[index].count;  
     },
     //点击减号按钮时的逻辑
     decreaseCart(index) {
       this.navContent[index].count--;
       this.$emit("decrese", this.navContent[index].price);
-       httpService.request(api.delCart, {"id":this.navContent[index].id}, "post").then(res => {
-    })
+      httpService
+        .request(api.delCart, { id: this.navContent[index].id }, "post")
+        .then(res => {});
+    },
+    //点击详情页的购物车跟加号按钮进行传的值
+    nums(){
+      this.navContent[this.temIndex].count++; //这是点击详情页加号后再商品数量的重新渲染
+      this.$emit("numsed",this.navContent[this.temIndex].price)
+    },
+    //点击详情页的减号按钮进行传的值
+    numDec(){
+      console.log("我是详情页减号传过来的值")
+      this.navContent[this.temIndex].count--;
+      this.$emit("numsDec",this.navContent[this.temIndex].price)
     }
   }
 };
@@ -1652,7 +217,10 @@ export default {
   width: 100%;
   height: 100%;
 }
-
+.show-wraper{
+  width: 100%;
+  height: 100%;
+}
 .move-enter,
 .move-leave-active {
   opacity: 0;
@@ -1709,7 +277,7 @@ export default {
 .nav-list {
   width: 22%;
   height: 100%;
-  background: #EEEEEE;
+  background: #eeeeee;
   overflow-y: auto;
 }
 .list {
@@ -1756,5 +324,10 @@ export default {
 .img {
   width: 100%;
   height: 100%;
+}
+.eli {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 </style>
