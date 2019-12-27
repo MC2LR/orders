@@ -2,7 +2,7 @@ import axios from 'axios';
 import router from '../router/index'
 
 //自动切换环境
-axios.defaults.baseURL = "http://10.167.20.50:8080/jeecg-boot/";
+axios.defaults.baseURL = "http://127.0.0.1:8080/jeecg-boot/";
 //设置超时时间
 axios.defaults.timeout = 10000;
 axios.defaults.withCredentials = true;

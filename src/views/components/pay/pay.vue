@@ -1,19 +1,23 @@
 <template>
   <div class="pay">
-    <div class="goodsWraper">
+    <div v-show="!isS" style="margin-top:50%;font-size:1rem; color:#AAA7A7;text-align:center">
+      <van-icon name="description" />
+      <p style="font-size:.2rem">暂无订单</p>
+    </div>
+    <div class="goodsWraper" v-show="isS">
       <div class="titles">料理の詳細</div>
       <div class="AdditionInfo">
         <p class="Serial">
           <span class="s">序号</span>
-          <span class="s">{{goodsAllData[0].Serial}}</span>
+          <span class="s">{{Serial}}</span>
         </p>
         <p class="Serial">
           <span class="s" style="color:#000000">桌号</span>
-          <span class="s" style="color:#000000">{{goodsAllData[0].tableNumber}}</span>
+          <span class="s" style="color:#000000">{{tableNumber}}</span>
         </p>
         <p class="Serial">
           <span class="s" style="color:#000000">人数</span>
-          <span class="s" style="color:#000000">{{goodsAllData[0].personNum}}</span>
+          <span class="s" style="color:#000000">{{this.orderNum}}</span>
         </p>
       </div>
       <div class="goodsDeteail">
@@ -24,111 +28,116 @@
           <span class="titled">数量</span>
         </div>
         <ul class="goods-wraper">
-          <li
-            class="goods-wraper-content"
-            v-for="(item,index) in goodsAllData[0].goods"
-            :key="index"
-          >
-            <img :src="item.img" />
-            <span style="width:1.55rem;text-align:center">{{item.name}}</span>
-            <span style="width:.5rem;text-align:center">{{item.tax}}</span>
-            <span style="margin-left:.25rem;width:.3rem;text-align:center">{{item.goodsNum}}</span>
+          <li class="goods-wraper-content" v-for="(item,index) in goodsAllData" :key="index">
+            <img :src="'http://10.167.20.50:8080/jeecg-boot/'+item.img" />
+            <span style="width:1.55rem;text-align:center">{{item.pname}}</span>
+            <span style="width:.5rem;text-align:center">{{item.price*1.08}}</span>
+            <span style="margin-left:.25rem;width:.3rem;text-align:center">{{item.count}}</span>
           </li>
         </ul>
       </div>
       <div class="count">
         <div class="Subtotal">
-          <p style="margin-left:.12rem">小計</p>
-          <p style="width:.8rem">￥{{goodsAllData[0].Subtotal}}</p>
-        </div>
-        <div class="Subtotal">
-          <p style="margin-left:.12rem;">割引券</p>
-          <p style="width:.8rem">￥{{goodsAllData[0].coupon}}</p>
+          <p style="margin-left:.12rem">总計</p>
+          <p style="width:.8rem">￥{{total}}</p>
         </div>
       </div>
-      <div class="pays" v-if="isShow">
-        <p class="as" @click="remark">备 注</p>
-        <p class="as" @click="ordered">下 单</p>
-      </div>
-      <div class="evalu" v-show="!isShow">
-          评 价
+      <div class="pays">
+        <p class="as" @click="remark">取 消</p>
+        <p class="as" @click="ordered">确 认</p>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import { Dialog } from 'vant';
+import { Dialog } from "vant";
+import { api } from "../../../api/api_system";
+import { httpService } from "../../../service/http.service";
 export default {
   name: "pay",
   data() {
     return {
-      isShow:true,
-      goodsAllData: [
-        {
-          tableNumber: "No.1",
-          personNum: 3,
-          goods: [
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              name: "烧茄子",
-              tax: "107",
-              goodsNum: "12"
-            },
-             {
-              img:
-                "http://fuss10.elemecdn.com/c/6b/29e3d29b0db63d36f7c500bca31d8jpeg.jpeg?imageView2/1/w/114/h/114",
-              name: "红杉鱼",
-              tax: "1045",
-              goodsNum: "1"
-            },
-              {
-              img:
-                "http://fuss10.elemecdn.com/f/28/a51e7b18751bcdf871648a23fd3b4jpeg.jpeg?imageView2/1/w/114/h/11",
-              name: "烤冷面",
-              tax: "5462",
-              goodsNum: "1"
-            },
-              {
-              img:
-                "http://fuss10.elemecdn.com/4/e7/8277a6a2ea0a2e97710290499fc41jpeg.jpeg?imageView2/1/w/114/h/114",
-              name: "烤腰子",
-              tax: "3254",
-              goodsNum: "1"
-            },
-            {
-              img:
-                "http://fuss10.elemecdn.com/c/cd/c12745ed8a5171e13b427dbc39401jpeg.jpeg?imageView2/1/w/114/h/114",
-              name: "烤辣椒",
-              tax: "7745",
-              goodsNum: "1"
-            }
-          ],
-          Subtotal: 2000,
-          coupon: "0",
-          total: 2000,
-          Serial: "5000000155255452"
-        }
-      ]
+      isS: false,
+      orderNum: localStorage.getItem("personNum"),
+      tableNumber: "No.1",
+      total:0,
+      Serial: "5000000155255452",
+      goodsAllData: [],
+     
     };
   },
-    components: {
+  components: {
     [Dialog.Component.name]: Dialog.Component
   },
-  methods: {
-      remark(){
-          console.log("备注了");
-      },
-      ordered(){
-        Dialog.confirm({
-          title: '立即下单？',
-              }).then(() => {
-                this.isShow=false;       
-              }).catch(() => {
-              });
-      }
+  watch: {
+    //点击订单后将购物车数据在订单也进行渲染
+     change:function(){
+        httpService.request(api.listCart, { id: null }, "post").then(res => {
+                 this.isS = true;
+                 this.goodsAllData.splice(0, this.goodsAllData.length);
+                 for (var i = 0; i < res.data.length; i++) {
+                   this.goodsAllData.push(res.data[i]);
+                 }
+                 this.total = localStorage.getItem("all");
+       });
+     },
+     //点击取消后，去除订单也数据
+     $route(to){
+       if(to.name == "pay"){
+         if(localStorage.getItem("is") == null){
+                 this.isS = false;
+         }
+       }
+     }
   },
+  props:{
+    //点击订单后触发监听事件
+    change:{
+      type:Number
+    }
+  },
+  created() {
+      //订单也渲染
+      httpService.request(api.listCart, { id: null }, "post").then(res => {
+        this.isS = true;
+        for (var i = 0; i < res.data.length; i++) {
+          this.goodsAllData.push(res.data[i]); //购物车赋值
+        }
+        this.total = localStorage.getItem("all");
+      });
+    
+  },
+  methods: {
+    remark() {
+      Dialog.confirm({
+        title: "是否取消订单？"
+      })
+        .then(() => {
+          localStorage.removeItem("is");
+          localStorage.setItem("clear", true);
+          this.$router.push({ name: "goods" });
+          this.$parent.active = 0;
+          this.goodsAllData.splice(0, this.goodsAllData.length);
+          console.log(this.goodsAllData);
+        })
+        .catch(() => {});
+    },
+    ordered() {
+      Dialog.confirm({
+        title: "立即下单？"
+      })
+        .then(() => {
+          localStorage.removeItem("is");
+          localStorage.setItem("clear", true);
+          this.$router.push({ name: "goods" });
+          this.$parent.active = 0;
+          this.goodsAllData.splice(0, this.goodsAllData.length);
+          //清空购物车
+        })
+        .catch(() => {});
+    }
+  }
 };
 </script>
 <style scoped>
@@ -138,6 +147,7 @@ export default {
   background: #f1f1f1;
   font-size: 0.14rem;
   position: relative;
+  overflow: hidden;
 }
 .goodsWraper {
   width: 100%;
@@ -233,31 +243,30 @@ export default {
   left: 0;
   bottom: 0;
 }
-.evalu{
-   width: 100%; 
+.evalu {
+  width: 100%;
   height: 0.5rem;
-  background: #EECA26;
+  background: #eeca26;
   text-align: center;
-  color:#f1f1f1;
-  line-height: .5rem;
-  font-size: .16rem;
-
+  color: #f1f1f1;
+  line-height: 0.5rem;
+  font-size: 0.16rem;
 }
 .as {
   height: 0.5rem;
   text-align: center;
   line-height: 0.5rem;
 }
-.as:nth-child(1){
-    width: 30%;
-   background: #EECA26;
-   color: #f1f1f1;
-   font-size: .16rem;
+.as:nth-child(1) {
+  width: 30%;
+  background: #eeca26;
+  color: #f1f1f1;
+  font-size: 0.16rem;
 }
-.as:nth-child(2){
-    width: 70%;
-   background: #9370DB;
-   color: #f1f1f1;
-   font-size: .16rem;
+.as:nth-child(2) {
+  width: 70%;
+  background: #9370db;
+  color: #f1f1f1;
+  font-size: 0.16rem;
 }
 </style>

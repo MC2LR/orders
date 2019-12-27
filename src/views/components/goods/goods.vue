@@ -1,6 +1,6 @@
 <template>
   <div class="goods">
-    <detaile v-show="!isIf" :clearDetaile="clearDetaile" :goodsNumed="goodsNumed" @fun="funs" :detaileFlag="detaileFlag" @numsDec="numDec" @nums="nums"/>
+    <detaile v-show="!isIf" :allData="allData" :temIndex="temIndex" :goodsNum="goodsNum" :clearDetaile="clearDetaile" :goodsNumId="goodsNumId"  @fun="funs"  @numsDec="numDec" @nums="nums"/>
     <div class="show-wraper" v-show="isIf">
     <!-- 轮播图 -->
       <div class="swripers">
@@ -33,9 +33,9 @@
         <!-- 商品列表对应的商品 -->
         <div class="nav-content">
           <ul>
-            <li v-for="(item,index) in navContent" :key="index" class="li-flex" @click="deteiled(item.id,index)">
+            <li v-for="(item,index) in navContent" :key="index" class="li-flex" @click="deteiled(index)">
               <div class="icon">
-                <img width="65" height="65" :src="'http://10.167.20.50:8080/jeecg-boot/'+item.img" />
+                <img width="65" height="65" :src="'http://127.0.0.1:8080/jeecg-boot/'+item.img" />
               </div>
               <div class="content">
                 <div class="goods-sort-weaper">
@@ -104,6 +104,9 @@ export default {
     goodsNumId: {
       type: String
     },
+    cal:{
+      type:Number
+    },
     clearDetaile:{
       type:Boolean
     },
@@ -115,19 +118,19 @@ export default {
       navDatas: [], //总数据渲染
       navContent: [], //点击商品列表要渲染的商品
       active: 0, //底部导航默认选中状态
-      detaileFlag:"",//临时储存商品id的变量
-      temIndex:0,//商品下标的临时变量
-      goodsNumed:0//将商品列表的商品数量传到详情页
+      temIndex:-1,//商品下标的临时变量
+      allData:null
     };
   },
   created() {
-
     // 初始化数据
     httpService.request(api.toProduct, { id: null }, "post").then(res => {
-      console.log(res);
       this.navDatas = res.data; //q请求到的数据进行二次赋值
       this.navContent = this.navDatas[0].navContent; //初始化数据
     });
+  },
+  provide:{
+    foo:this
   },
   watch: {
     //点击购物车的清空后便利总数据，将总有的商品数目归零
@@ -145,6 +148,16 @@ export default {
     },
     //将购物车里的数量与商品列表的数量统一归零
     goodsId: function() {
+      for (var i = 0; i < this.navDatas.length; i++) {
+        for (var j = 0; j < this.navDatas[i].navContent.length; j++) {
+          if (this.goodsId == this.navDatas[i].navContent[j].id) {
+            this.navDatas[i].navContent[j].count = 0;
+          }
+        }
+      }
+    },
+    //购物车归零=》商品列表归零
+    cal:function (){
       for (var i = 0; i < this.navDatas.length; i++) {
         for (var j = 0; j < this.navDatas[i].navContent.length; j++) {
           if (this.goodsId == this.navDatas[i].navContent[j].id) {
@@ -184,11 +197,10 @@ export default {
       this.isIf = true; //让详情页隐藏，列表页显示
     },
     //跳转详情页
-    deteiled(id,index){
-      this.detaileFlag = id;//将商品id赋给临时变量，传到详情页
+    deteiled(index){
       this.isIf=false; 
-      this.temIndex = index; //将在详情页要展示的商品的下标进行保存
-      this.goodsNumed = this.navContent[index].count;  
+      this.temIndex = index; //将在详情页要展示的商品的下标进行保存，在详情页通过此显示商品数量
+      this.allData = this.navContent[index];  
     },
     //点击减号按钮时的逻辑
     decreaseCart(index) {

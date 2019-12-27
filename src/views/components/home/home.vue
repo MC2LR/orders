@@ -3,7 +3,19 @@
     <!-- 菜品 -->
     <div class="nav-wraper">
       <keep-alive>
-        <router-view :clearDetaile="clearDetaile" @numsDec="numsDec" @numsed="numed" :isif="isif" @childByValue="priceData" @decrese="decrese" :flag="clears" :goodsNumId="goodsNumId" :goodsId="goodsId" :goodsNum="goodsNum"/>
+        <router-view
+          :clearDetaile="clearDetaile"
+          :cal="cal"
+          @numsDec="numsDec"
+          @numsed="numed"
+          :isif="isif"
+          @childByValue="priceData"
+          @decrese="decrese"
+          :flag="clears"
+          :goodsNumId="goodsNumId"
+          :goodsId="goodsId"
+          :goodsNum="goodsNum"
+        />
       </keep-alive>
     </div>
     <!-- 购物车logo -->
@@ -15,6 +27,7 @@
         </div>
         <span class="priClo" :class="{'heightLight':this.allPrice>0}">￥{{allPrice}}</span>
       </div>
+      <div @click="torder" class="to-order" v-show="allPrice>0">下 单</div>
     </div>
     <!-- 购物车 -->
     <transition name="fold">
@@ -48,7 +61,7 @@
               <transition name="move">
                 <div class="decrease" @click="dle(index)">-</div>
               </transition>
-              <div class="count" >{{item.count}}</div>
+              <div class="count">{{item.count}}</div>
               <div class="add" @click="add(index)">+</div>
             </div>
           </li>
@@ -70,92 +83,121 @@ export default {
   data() {
     return {
       allPrice: 0, //总价格
-      num: 0,//总数量
-      clearDetaile:false,
-    //此变量是将购物车的商品数量传到详情页，让其统一商品的数量
-      listShow: false,//是否显示商品列表
-      goodsId:"",//将商品的id传到goods
-      goodsNum:0,//商品照片总量
-      goodsNumId:"",//商品id所对应的数量
+      num: 0, //总数量
+      clearDetaile: false,
+      //此变量是将购物车的商品数量传到详情页，让其统一商品的数量
+      listShow: false, //是否显示商品列表
+      goodsId: "", //将商品的id传到goods
+      goodsNum: 0, //商品照片总量
+      goodsNumId: "", //商品id所对应的数量
       clears: false, //清空购物车flag
-      cartDtas: [      //购物车数据
-       
+      cal: 0, //监听变量
+      cartDtas: [
+        //购物车数据
       ] //购物车数据
     };
   },
-   props: {
+  props: {
     isif: {
       type: Boolean //父组件穿过来的
+    }
+  },
+  watch:{
+    allPrice:function(){
+        localStorage.setItem("all",this.allPrice);
+        localStorage.removeItem("clear");
     },
-   },
+    //取消订单时清空购物车
+    $route(){
+      if(localStorage.getItem("clear")){
+        this.clear();
+      }
+    },
+  },
   methods: {
     //如果总价格大于零，遮罩层和购车车的商品将显示
     cartShow() {
       if (this.allPrice > 0) {
         this.clearDetaile = false;
         this.listShow = true; //如果商品大于零，让商品列表显示
-         httpService.request(api.listCart,{"id":null}, "post").then(res => {
-          this.cartDtas = res.data;//将获取到的数据进行赋值
-    })
-  }
+        httpService.request(api.listCart, { id: null }, "post").then(res => {
+          this.cartDtas = res.data; //将获取到的数据进行赋值
+        });
+      }
+    },
+    
+    //去下单事件
+    torder() { 
+      this.$parent.active = 1;
+      localStorage.setItem("is",true);
+      this.$router.push({name:"pay"});
+      console.log(this.$parent.change);
+      this.$parent.change++;
+      console.log(this.$parent.change);
+
     },
     //通过详情页进行的商品加减(通过点击购物车和加好按钮触发的事件)
-    numed(allPrice){
-      this.allPrice = this.allPrice + parseInt(allPrice)+allPrice*1.08; //进行购物车的总价进行赋值
+    numed(allPrice) {
+      this.allPrice = this.allPrice + parseInt(allPrice)+ allPrice * 1.08; //进行购物车的总价进行赋值
       this.num++; //进行购物车商品总数量的赋值
-    },   
+    },
     //通过详情页进行的商品加减(通过点击减号触发的事件)
-    numsDec(allPrice){
-         this.allPrice = this.allPrice - parseInt(allPrice)-allPrice*1.08;
-         this.num--;
+    numsDec(allPrice) {
+      this.allPrice = this.allPrice - parseInt(allPrice) - allPrice * 1.08;
+      this.num--;
     },
     //购物车里的减号方法
-    dle(index){
-      this.cartDtas[index].count--;//让当前商品数量减少
-      this.num --;//总数量减少
-      this.goodsNumId = this.cartDtas[index].id;//将当前商品的id传到goods里进行判断
-      this.goodsNum = this.cartDtas[index].count;//将当前商品数量传到goods
+    dle(index) {
+      this.cartDtas[index].count--; //让当前商品数量减少
+      this.num--; //总数量减少
+      this.goodsNumId = this.cartDtas[index].id; //将当前商品的id传到goods里进行判断
+      this.goodsNum = this.cartDtas[index].count; //将当前商品数量传到goods
       this.allPrice = this.allPrice-parseInt(this.cartDtas[index].price)-this.cartDtas[index].price*1.08;//将税后总价赋值
-       httpService.request(api.delCart,{"id":this.cartDtas[index].id}, "post").then(res => {
-         if(this.cartDtas[index].count == 0){
-           this.goodsId = this.cartDtas[index].id
-           this.cartDtas.splice(index,1);
-            if(this.cartDtas.length == 0){
+      httpService
+        .request(api.delCart, { id: this.cartDtas[index].id }, "post")
+        .then(res => {
+          if (this.cartDtas[index].count == 0) {
+            this.cal++;
+            this.goodsId = this.cartDtas[index].id;
+            this.cartDtas.splice(index, 1);
+            if (this.cartDtas.length == 0) {
               //如果购物车里的商品为零，让遮罩层消失，总价和总数量归零
               this.listShow = false;
-              this.num =0; 
+              this.num = 0;
               this.allPrice = 0;
             }
           }
-    })
+        });
     },
-    add(index){
-      httpService.request(api.addCart,{"id":this.cartDtas[index].id}, "post").then(res => {
-        this.cartDtas[index].count++;
-          this.num ++;
+    add(index) {
+      httpService
+        .request(api.addCart, { id: this.cartDtas[index].id }, "post")
+        .then(res => {
+          this.cartDtas[index].count++;
+          this.num++;
           this.allPrice =this.allPrice+parseInt(this.cartDtas[index].price)+this.cartDtas[index].price*1.08;
-        this.goodsNumId = this.cartDtas[index].id;
-        this.goodsNum = this.cartDtas[index].count;
-    })
+          this.goodsNumId = this.cartDtas[index].id;
+          this.goodsNum = this.cartDtas[index].count;
+        });
     },
     //控制遮罩层的显示隐藏
     maskDisappear() {
       this.listShow = false;
     },
     priceData(value) {
-      this.allPrice =  this.allPrice + parseInt(value)+value*1.08; //总价相加
+      this.allPrice = this.allPrice + value * 1.08; //总价相加
       this.num++; //总数目相加
     },
     //总价相减
     decrese(value) {
-      this.allPrice = this.allPrice-parseInt(value)-value*1.08; //控制总价
+      this.allPrice = this.allPrice - value * 1.08; //控制总价
       this.num--;
     },
     //清空购物车
     clear() {
-       httpService.request(api.clearCart,{"id":null}, "post").then(res => {
-          this.clearDetaile = true;
-    })
+      httpService.request(api.clearCart, { id: null }, "post").then(res => {
+        this.clearDetaile = true;
+      });
       this.cartDtas.splice(0, this.cartDtas.length); //清空数据
       this.listShow = false; //购物车弹框隐藏
       this.allPrice = 0; //清空是将总价归零
@@ -175,6 +217,14 @@ export default {
   width: 100%;
   height: 85%;
   display: -webkit-flex;
+}
+.to-order {
+  width: 30%;
+  height: 100%;
+  background:#EECA26; 
+  text-align: center;
+  color: #141d27;
+  line-height: .5rem;
 }
 .list-header {
   width: 100%;
